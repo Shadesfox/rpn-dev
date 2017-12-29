@@ -1,11 +1,11 @@
+const body_parser = require('body-parser');
+
 module.exports = function(app) {
+    app.use(body_parser.urlencoded({extended: false}));
+    app.use(body_parser.json({extended: true}));
+
     app.get('/', function(req, res){
+	// TODO: Should direct to some landing page while client is it's own route
 	res.sendFile(__dirname + '/client.html');
-    });
-    app.get('/new_user', function(req, res){
-	res.sendFile(__dirname + '/create_user.html');
-    });
-    app.get('/login', function(req, res){
-	res.sendFile(__dirname + '/login.html');
     });
 }
