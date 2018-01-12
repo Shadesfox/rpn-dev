@@ -1,6 +1,8 @@
 const pg = require('pg');
 const connection_string = process.env.DATABASE_URL || 'postgres:///rpn';
 const passwd_module = require('secure-password');
+const jwt = require('jsonwebtoken');
+const fs = require('fs');
 
 module.exports = function(app) {
     app.get('/new_user', function(req, res){
@@ -16,7 +18,7 @@ module.exports = function(app) {
 	    console.log('made a hash: ' + hash);
 	    const db_client = new pg.Client(connection_string);
 	    db_client.connect();
-	    db_client.query("INSERT INTO rpn_users(user_name,passwd_hash) VALUES ($1,$2);",
+	    db_client.query("INSERT INTO rpn_users(user_name,passwd_hash,credentials) VALUES ($1,$2,'{}');",
 			    [req.body.name,hash], function (err, db_res) {
 				db_client.end();
 				if (err) {
@@ -43,7 +45,7 @@ module.exports = function(app) {
 	const db_client = new pg.Client(connection_string);
 	const passwd_hasher = passwd_module();
 	db_client.connect();
-	db_client.query("SELECT passwd_hash FROM rpn_users WHERE user_name = ($1);",
+	db_client.query("SELECT * FROM rpn_users WHERE user_name = ($1);",
 			[req.body.name], function (err, db_res) {
 			    db_client.end();
 			    if (err) throw err;
@@ -55,19 +57,34 @@ module.exports = function(app) {
 				console.log("No such user: " + msg.user_name);
 				return;
 			    }
-			    passwd_hasher.verify(user_passwd, db_res.rows[0].passwd_hash, function (err, result) {
+			    const user_row = db_res.rows[0];
+			    passwd_hasher.verify(user_passwd, user_row.passwd_hash, function (err, result) {
 				if (err) throw err;
 				if (result === passwd_module.INVALID_UNRECOGNIZED_HASH) {
 				    console.log('This hash was not made with secure-password. Attempt legacy algorithm');
 				    return;
 				}
 				if (result === passwd_module.INVALID) {
+				    // TODO: Indication of this error, probably a redirect.
 				    console.log('Imma call the cops');
 				    return;
 				}
 				if (result === passwd_module.VALID) {
 				    console.log('Yay you made it');
-				    
+				    //const cert = fs.readFileSync('secret_key');
+				    // TODO: read cert from file system head of time.
+				    // The const cert just lets us debug the jwt.
+				    const cert = "secret";
+				    const seconds = Math.floor(Date.now() / 1000);
+				    var login_token = {
+					"credentials" : user_row.credentials,
+					"exp" : seconds + 60 * 60 * 24,
+					"iat" : seconds
+				    };
+				    jwt.sign(login_token, cert, { algorithm: 'HS256' }, function(err, token) {
+					if (err) throw err;
+					console.log(token);
+				    });
 				    return;
 				}
 				if (result === passwd_module.VALID_NEEDS_REHASH) {
