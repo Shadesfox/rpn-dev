@@ -3,7 +3,10 @@
   "version": "0.0.1",
   "dependencies": {
     "body-parser": "^1.18.2",
+    "consolidate": "^0.15.0",
     "cookie-parser": "^1.4.3",
+    "csurf": "^1.9.0",
+    "dustjs-linkedin": "^2.7.5",
     "express": "^4.16.2",
     "helmet": "^3.9.0",
     "js-lru-cache": "^0.1.10",

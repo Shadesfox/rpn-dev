@@ -77,6 +77,8 @@ module.exports = function(app) {
 				    const cert = "secret";
 				    const seconds = Math.floor(Date.now() / 1000);
 				    var login_token = {
+					"user_name" : user_row.user_name,
+					"iss" : "https://rpnetwork.org",
 					"credentials" : user_row.credentials,
 					"exp" : seconds + 60 * 60 * 24,
 					"iat" : seconds

@@ -3,6 +3,7 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const helmet = require('helmet');
 const cookie_parser = require('cookie-parser');
+const csurf = require('csurf');
 
 const port=8081;
 const address='localhost';
@@ -10,6 +11,7 @@ const address='localhost';
 // See about modifying this one to not skip caching
 app.use(helmet());
 app.use(cookie_parser());
+app.use(csurf({cookie:true}));
 
 require('./app_routes.js')(app);
 require('./rpn_login.js')(app);
