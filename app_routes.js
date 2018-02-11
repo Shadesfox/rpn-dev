@@ -3,8 +3,19 @@ const rpn_user = require('./models/user_auth');
 
 module.exports = function(app) {
     app.get('/', function(req, res){
-	// TODO: Should direct to some landing page while client is it's own route
-	res.sendFile(__dirname + '/client.html');
+	res.sendFile(__dirname + '/static/index.html');
+    });
+    app.get('/chat', function(req, res){
+	const login_data = jwt.verify(req.cookies.rpn_auth,"secret");
+	if (login_data) {
+	    console.log("Yay logged in user!");
+	    res.render('chat', {
+		csrfToken: req.csrfToken(),
+		user_name: login_data.user_name
+	    });
+	} else {
+	    res.redirect('/login');
+	}
     });
     app.get('/new_user', function(req, res){
         res.render('create_user', {

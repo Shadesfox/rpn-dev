@@ -26,7 +26,7 @@ require('./app_routes.js')(app);
 
 io.on('connection', function(socket){
     console.log('a user connected');
-    require('./rpn_chat.js')(socket,io);
+    require('./rpn_chat_sockets.js')(socket,io);
 });
 
 server.listen(port, address,function(){

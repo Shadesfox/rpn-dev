@@ -3,7 +3,7 @@ module.exports = function(socket,io) {
 	console.log('user disconnected');
     });
     socket.on('chat message', function(msg){
-	console.log('message: ' + msg);
+	console.log('user: ' + msg.user + ' message: ' + msg.msg);
 	io.emit('chat message', msg);
     });
 };

@@ -15,25 +15,6 @@
     </style>
   </head>
   <body>
-    <!--
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-    <script>
-      $(function () {
-        var socket = io();
-        $('form').submit(function(){
-          var message = {
-            "user_name":$('#user_name').val(),
-            "password":$('#user_password').val()
-          };
-          socket.emit('user auth', message);
-          $('#user_name').val('');
-          $('#user_password').val('');
-          return false;
-        });
-      });
-    </script>
--->
     <form method="post">
       <input name="name" autocomplete="off" />
       <input name="password" autocomplete="off" type="password" />
