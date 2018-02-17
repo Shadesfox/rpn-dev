@@ -1,17 +1,23 @@
 const jwt = require('jsonwebtoken');
 const rpn_user = require('./models/user_auth');
+const rpn_cbox = require('./models/rpn_cbox');
 
 module.exports = function(app) {
     app.get('/', function(req, res){
 	res.sendFile(__dirname + '/static/index.html');
     });
     app.get('/chat', function(req, res){
+	//Check for cookie, then JTW it.
 	const login_data = jwt.verify(req.cookies.rpn_auth,"secret");
 	if (login_data) {
 	    console.log("Yay logged in user!");
+	    //Put this in a view that can be detached from the main event loop
+	    console.log("login_data = " + login_data.user_id);
+	    cbox = rpn_cbox.get_cbox(login_data.user_id);
 	    res.render('chat', {
 		csrfToken: req.csrfToken(),
-		user_name: login_data.user_name
+		user_name: login_data.user_name,
+		characters: cbox
 	    });
 	} else {
 	    res.redirect('/login');

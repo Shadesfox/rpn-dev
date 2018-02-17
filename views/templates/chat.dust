@@ -35,7 +35,9 @@
     </script>
     <ul id="messages"></ul>
     <form action="">
-      <input id="m" autocomplete="off" /><button>Send</button>
+      <input id="m" autocomplete="off" />
+      {>"cbox_dropdown"/}
+      <button>Send</button>
       <input type="hidden" name="_csrf" value="{csrfToken}">
       <input type="hidden" id="user_name" value="{user_name}">
     </form>

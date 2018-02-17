@@ -1,8 +1,8 @@
-const pg = require('pg');
-const connection_string = process.env.DATABASE_URL || 'postgres:///rpn';
 const passwd_module = require('secure-password');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
+const rpn_cbox = require('./rpn_cbox');
+const db_client = require('../controllers/db');
 
 exports.USER_NOT_FOUND=1;
 exports.PASSWORD_INVALID=2;
@@ -14,11 +14,8 @@ exports.add_user = function(user_name, user_password, reply_cb) {
     passwd_hasher.hash(Buffer.from(user_password), function (err, hash) {
 	if (err) throw err;
 	console.log('made a hash: ' + hash);
-	const db_client = new pg.Client(connection_string);
-	db_client.connect();
-	db_client.query("INSERT INTO rpn_users(user_name,passwd_hash,credentials) VALUES ($1,$2,'{}');",
+	db_client.query("INSERT INTO rpn_users(user_name,passwd_hash,credentials) VALUES ($1,$2,'{}') RETURNING user_id;",
 			[user_name,hash], function (err, db_res) {
-			    db_client.end();
 			    if (err) {
 				if (err.constraint === 'rpn_users_user_name_key') {
 				    console.log("User name " + req.body.name + " is already taken.");
@@ -28,17 +25,21 @@ exports.add_user = function(user_name, user_password, reply_cb) {
 				    throw err;
 				}
 			    }
-			    reply_cb(null);
+			    const user_id = db_res.rows[0].user_id;
+			    var credentials = {
+				privileges : {
+				    chat : true
+				} 
+			    };
+			    reply_cb(null, credentials);
+			    rpn_cbox._add_character(user_id,{character_name:user_name});
 			});
     });
 }
 
 exports.auth_user = function(user_name, user_password, reply_cb) {
-    const db_client = new pg.Client(connection_string);
-    db_client.connect();
     db_client.query("SELECT * FROM rpn_users WHERE user_name = ($1);",
 		    [user_name], function (err, db_res) {
-			db_client.end();
 			if (err) throw err;
 			if (db_res.rowCount != 1) {
 			    if (db_res.rowCount > 1) {
@@ -68,6 +69,7 @@ exports.auth_user = function(user_name, user_password, reply_cb) {
 				const seconds = Math.floor(Date.now() / 1000);
 				var login_token = {
 				    "user_name" : user_row.user_name,
+				    "user_id" : user_row.user_id,
 				    "iss" : "https://rpnetwork.org",
 				    "credentials" : user_row.credentials,
 				    "exp" : seconds + 60 * 60 * 24,
