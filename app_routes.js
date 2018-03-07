@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
-const rpn_user = require('./models/user_auth');
-const rpn_cbox = require('./models/rpn_cbox');
+const rpn_login = require('./models/user_auth');
+const rpn_user = require('./controllers/user_data');
+const rpn_cbox = require('./controllers/rpn_cbox');
 
 module.exports = function(app) {
     app.get('/', function(req, res){
@@ -13,7 +14,7 @@ module.exports = function(app) {
 	    console.log("Yay logged in user!");
 	    //Put this in a view that can be detached from the main event loop
 	    console.log("login_data = " + login_data.user_id);
-	    cbox = rpn_cbox.get_cbox(login_data.user_id);
+	    const cbox = rpn_cbox.get_cbox(login_data.user_id);
 	    res.render('chat', {
 		csrfToken: req.csrfToken(),
 		user_name: login_data.user_name,
@@ -21,6 +22,7 @@ module.exports = function(app) {
 	    });
 	} else {
 	    res.redirect('/login');
+	    res.end();
 	}
     });
     app.get('/new_user', function(req, res){
@@ -49,9 +51,9 @@ module.exports = function(app) {
     });
     app.post('/login', function(req, res){
 	console.log('Logging in with user: ' + req.body.name);
-	rpn_user.auth_user(req.body.name,req.body.password,function(err,token){
-	    if (err == rpn_user.FLAGRENT_SYSTEM_ERROR) throw err;
-	    if (err == rpn_user.PASSWORD_INVALID) console.log("I'mma call the cops!");
+	rpn_login.auth_user(req.body.name,req.body.password,function(err,token){
+	    if (err == rpn_login.FLAGRENT_SYSTEM_ERROR) throw err;
+	    if (err == rpn_login.PASSWORD_INVALID) console.log("I'mma call the cops!");
 	    if (err == rpn_user.USER_NOT_FOUND) console.log("User not in database: " + req.body.name);
 	    console.log(token);
 	    if (token) {
