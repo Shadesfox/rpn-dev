@@ -1,0 +1,4 @@
+<div class="toon_name">{toon_name}</div>
+<div class="toon_avatar"><img src="{toon_image_url}"></div>
+<div class="toon_header">{toon_header_text}</div>
+<div class="toon_chat_message">{toon_chat_message}</div>

@@ -1,4 +1,5 @@
-const app = require('express')();
+const express = require('express');
+const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const helmet = require('helmet');
@@ -21,6 +22,7 @@ app.use(cookie_parser());
 app.use(body_parser.urlencoded({extended: false}));
 app.use(body_parser.json({extended: true}));
 app.use(csurf({cookie:true}));
+app.use(express.static('static'));
 
 require('./app_routes.js')(app);
 
